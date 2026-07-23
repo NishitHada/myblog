@@ -1,0 +1,122 @@
+baseURL: "https://NishitHada.github.io/myblog/"
+languageCode: "en-us"
+title: "Nishit's Blog"
+theme: "PaperMod"
+pagination:
+  pagerSize: 5
+
+enableInlineShortcodes: true
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+googleAnalytics: ""
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+params:
+  env: production
+  title: "Nishit's Blog"
+  description: "Notes on backend engineering, distributed systems, and building things."
+  keywords: [Blog, Engineering, Backend, Distributed Systems]
+  author: "Nishit"
+  DateFormat: "January 2, 2006"
+  defaultTheme: auto
+  disableThemeToggle: false
+  ShowReadingTime: true
+  ShowShareButtons: false
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  ShowWordCount: true
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: false
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+  assets:
+    disableHLJS: true
+    favicon: "favicon.ico"
+
+  label:
+    text: "Nishit's Blog"
+    icon: ""
+    iconHeight: 35
+
+  homeInfoParams:
+    Title: "Hi, I'm Nishit 👋"
+    Content: "I write about backend engineering, distributed systems, and things I build. Senior Backend Engineer working with Ruby on Rails, Elixir, Go, and AWS."
+
+  socialIcons:
+    - name: github
+      url: "https://github.com/NishitHada"
+    - name: linkedin
+      url: "https://linkedin.com/in/NishitHada"
+    - name: rss
+      url: "index.xml"
+
+  editPost:
+    URL: "https://github.com/NishitHada/myblog/tree/main/content"
+    Text: "Suggest Changes"
+    appendFilePath: true
+
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    keys: ["title", "permalink", "summary", "content"]
+
+menu:
+  main:
+    - identifier: posts
+      name: Posts
+      url: /posts/
+      weight: 10
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 20
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 30
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    noClasses: false
+    codeFences: true
+    guessSyntax: true
+    lineNos: false
+    style: monokai
+
+privacy:
+  vimeo:
+    disabled: false
+    simple: true
+  x:
+    disabled: false
+    enableDNT: true
+    simple: true
+  youtube:
+    disabled: false
+    privacyEnhanced: true
+
+outputs:
+  home:
+    - HTML
+    - RSS
+    - JSON
