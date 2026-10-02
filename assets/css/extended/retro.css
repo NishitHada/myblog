@@ -65,7 +65,7 @@ h2 { font-size: 1.1rem; }
 h3 { font-size: 0.95rem; }
 
 .header, .main, .footer { position: relative; z-index: 1; }
-.main { background: rgba(0, 0, 30, 0.6); }
+.main { background: rgba(0, 0, 30, 0.35); }
 .header { background: rgba(0, 0, 0, 0.6); border-bottom: 3px solid var(--retro-magenta); }
 .logo a { color: var(--retro-yellow); font-size: 14px; text-shadow: 2px 2px 0 var(--retro-magenta); }
 #menu a { font-size: 11px; color: var(--retro-cyan); }
