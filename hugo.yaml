@@ -24,8 +24,8 @@ params:
   keywords: [Blog, Engineering, Backend, Distributed Systems]
   author: "Nishit"
   DateFormat: "January 2, 2006"
-  defaultTheme: auto
-  disableThemeToggle: false
+  defaultTheme: dark
+  disableThemeToggle: true
   ShowReadingTime: true
   ShowShareButtons: false
   ShowPostNavLinks: true
@@ -79,18 +79,22 @@ params:
 
 menu:
   main:
-    - identifier: posts
-      name: Posts
-      url: /posts/
+    - identifier: tech
+      name: Tech
+      url: /tech/
       weight: 10
-    - identifier: tags
-      name: Tags
-      url: /tags/
+    - identifier: economics
+      name: Economics
+      url: /economics/
       weight: 20
+    - identifier: projects
+      name: Projects
+      url: /projects/
+      weight: 30
     - identifier: about
       name: About
       url: /about/
-      weight: 30
+      weight: 40
 
 markup:
   goldmark:
