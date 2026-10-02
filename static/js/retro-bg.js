@@ -58,9 +58,10 @@
 
   /* ================= GAME 1: RUNNER ================= */
   var HERO_BASE = [
-    '...rrrr...', '..rRRRRr..', '.rRRRRRRr.', '..SSSSSS..', '..SKSSKS..', '..SSSSSS..',
-    '...SSSS...', '.BBBBBBBB.', 'SBBBBBBBBS', 'S.BBYYBB.S', '..bbbbbb..'
+    '...KKKK...', '..KKKKKK..', '..KSSSSK..', '..SSSSSS..', '..SKSSKS..', '..SSSSSS..',
+    '...SSSS...', 'GGOOOOOO..', 'GGOOOOOOSS', 'GG.OGGOO.S', 'G..bbbbbb.'
   ];
+  var FLAME = [['Y.', 'O.', 'R.'], ['O.', 'R.', '..']];
   var LEGS = [
     ['..bb..bb..', '..bb..bb..', '.KKK..KKK.'],
     ['...bbbb...', '...bbbb...', '..KKKKKK..'],
@@ -161,6 +162,7 @@
       var hero = this.hero;
       var legs = hero.air ? LEGS[2] : LEGS[Math.floor(hero.t * 8) % 2];
       draw(HERO_BASE.concat(legs), hero.x, hero.y);
+      if (hero.air) draw(FLAME[Math.floor(t * 20) % 2], hero.x, hero.y + 11);
     }
   };
 
@@ -360,8 +362,138 @@
     }
   };
 
+
+  /* ================= GAME 4: CITY BUILDER (isometric) ================= */
+  function mod(n, m) { return ((n % m) + m) % m; }
+  function isoDiamond(g, x, y, color) {
+    g.fillStyle = color;
+    for (var r = 0; r < 8; r++) {
+      var half = (r < 4 ? r + 1 : 8 - r) * 2;
+      g.fillRect(Math.round(x) - half, Math.round(y) + r, half * 2, 1);
+    }
+  }
+  function cube(x, y, h, top, left, right, stripes) {
+    for (var dx = -8; dx < 8; dx++) {
+      var a = 8 - Math.abs(dx + 0.5);
+      var y0 = Math.round(y + 4 - a / 2 - h), y1 = Math.round(y + 4 + a / 2 - h), y2 = Math.round(y + 4 + a / 2);
+      ctx.fillStyle = top; ctx.fillRect(x + dx, y0, 1, y1 - y0);
+      var side = dx < 0 ? left : right;
+      if (stripes && mod(dx, 3) === 0) side = dx < 0 ? '#555555' : '#aaaaaa';
+      ctx.fillStyle = side; ctx.fillRect(x + dx, y1, 1, y2 - y1);
+    }
+  }
+  var BUILDINGS = [
+    { w: 55, h: 5, top: '#aa0000', l: '#a0723f', r: '#d9a566', cost: 30 },
+    { w: 25, h: 7, top: '#ff5555', l: '#aaaaaa', r: '#ffffff', cost: 60 },
+    { w: 12, h: 6, top: '#ff8800', l: '#aa7722', r: '#ffcc55', cost: 45 },
+    { w: 8, h: 9, top: '#ffff55', l: '#aaaaaa', r: '#ffffff', cost: 150, stripes: true }
+  ];
+
+  var city = {
+    label: 'DENARII', duration: 18,
+    sx: function (gx, gy) { return Math.round((gx - gy) * 8 + W / 2); },
+    sy: function (gx, gy) { return (gx + gy) * 4 - 8; },
+    road: function (gx, gy) { return mod(gx, 5) === 0 || mod(gy, 5) === 0; },
+    reset: function () {
+      this.t = 0; this.score = 0; this.buildT = 0.5;
+      this.blds = []; this.occ = {}; this.walkers = [];
+      this.makeTerrain();
+      for (var i = 0; i < 16; i++) this.addWalker();
+    },
+    visible: function (gx, gy) {
+      var x = this.sx(gx, gy), y = this.sy(gx, gy);
+      return x > -8 && x < W + 8 && y > -4 && y < H - 4;
+    },
+    makeTerrain: function () {
+      var c = document.createElement('canvas'); c.width = W; c.height = H;
+      var g = c.getContext('2d');
+      g.fillStyle = '#000'; g.fillRect(0, 0, W, H);
+      for (var gx = -34; gx < 80; gx++) {
+        for (var gy = -34; gy < 80; gy++) {
+          var x = this.sx(gx, gy), y = this.sy(gx, gy);
+          if (x < -8 || x > W + 8 || y < -8 || y > H) continue;
+          var road = this.road(gx, gy);
+          isoDiamond(g, x, y, road ? '#a67c3d' : (((gx + gy) & 1) ? '#006a00' : '#007400'));
+          g.fillStyle = road ? '#7a5a2a' : '#00aa00';
+          for (var k = 0; k < 2; k++) g.fillRect(x - 5 + Math.floor(Math.random() * 10), y + 2 + Math.floor(Math.random() * 4), 1, 1);
+        }
+      }
+      this.terrain = c;
+    },
+    addWalker: function () {
+      for (var tries = 0; tries < 60; tries++) {
+        var axis = Math.random() < 0.5 ? 'x' : 'y';
+        var along = Math.floor(Math.random() * 90) - 30;
+        var lane = Math.floor((Math.random() * 90 - 30) / 5) * 5;
+        var gx = axis === 'x' ? along : lane;
+        var gy = axis === 'x' ? lane : along;
+        if (!this.visible(gx, gy)) continue;
+        var kind = Math.random();
+        this.walkers.push({
+          gx: gx, gy: gy, axis: axis, dir: Math.random() < 0.5 ? 1 : -1,
+          speed: 0.8 + Math.random() * 0.8,
+          color: kind < 0.2 ? '#ff5555' : (kind < 0.35 ? '#aa5500' : '#ffffff'),
+          cart: kind >= 0.2 && kind < 0.35
+        });
+        return;
+      }
+    },
+    update: function (dt) {
+      this.t += dt;
+      var i;
+      this.buildT -= dt;
+      if (this.buildT <= 0 && this.blds.length < 70) {
+        this.buildT = 0.3 + Math.random() * 0.2;
+        for (var tries = 0; tries < 40; tries++) {
+          var gx = Math.floor(Math.random() * 90) - 30, gy = Math.floor(Math.random() * 90) - 30;
+          var key = gx + ',' + gy;
+          if (this.road(gx, gy) || this.occ[key] || !this.visible(gx, gy)) continue;
+          var roll = Math.random() * 100, acc = 0, ty = BUILDINGS[0];
+          for (var b = 0; b < BUILDINGS.length; b++) { acc += BUILDINGS[b].w; if (roll < acc) { ty = BUILDINGS[b]; break; } }
+          this.occ[key] = true;
+          this.blds.push({ gx: gx, gy: gy, ty: ty, p: 0 });
+          this.score += ty.cost;
+          break;
+        }
+      }
+      for (i = 0; i < this.blds.length; i++) this.blds[i].p = Math.min(1, this.blds[i].p + dt * 2.2);
+      for (i = 0; i < this.walkers.length; i++) {
+        var w = this.walkers[i], step = w.dir * w.speed * dt;
+        if (w.axis === 'x') w.gx += step; else w.gy += step;
+        if (!this.visible(w.gx, w.gy)) { w.dir *= -1; if (w.axis === 'x') w.gx += w.dir * 0.2; else w.gy += w.dir * 0.2; }
+      }
+    },
+    render: function () {
+      var i, ents = [];
+      ctx.drawImage(this.terrain, 0, 0);
+      rect('rgba(0,0,0,0.3)', 0, 0, W, H);
+      for (i = 0; i < this.blds.length; i++) ents.push({ k: this.blds[i].gx + this.blds[i].gy + 0.5, b: this.blds[i] });
+      for (i = 0; i < this.walkers.length; i++) ents.push({ k: this.walkers[i].gx + this.walkers[i].gy + 0.5, w: this.walkers[i] });
+      ents.sort(function (a, b) { return a.k - b.k; });
+      for (i = 0; i < ents.length; i++) {
+        var e = ents[i];
+        if (e.b) {
+          var b = e.b, ty = b.ty;
+          cube(this.sx(b.gx, b.gy), this.sy(b.gx, b.gy), Math.max(1, Math.round(ty.h * b.p)), ty.top, ty.l, ty.r, ty.stripes);
+        } else {
+          var w = e.w, x = this.sx(w.gx, w.gy), y = Math.round(this.sy(w.gx, w.gy)) + 4;
+          var fr = Math.floor(this.t * 6) % 2;
+          if (w.cart) {
+            rect('#552200', x - 3, y - 3, 6, 3);
+            rect('#aa5500', x - 3, y - 4, 6, 1);
+            rect('#000', x - 2, y, 2, 1); rect('#000', x + 1, y, 2, 1);
+          } else {
+            rect('#ffaa55', x, y - 5, 1, 1);
+            rect(w.color, x - 1, y - 4, 3, 3);
+            rect('#000', x - fr, y - 1, 1, 1); rect('#000', x + fr, y - 1, 1, 1);
+          }
+        }
+      }
+    }
+  };
+
   /* ================= manager ================= */
-  var games = [runner, chomper, invaders];
+  var games = [runner, chomper, invaders, city];
   var cur = games[Math.floor(Math.random() * games.length)];
   var state = 'play', timer = 0;
   var OVER = 2.6, WIPE = 0.45;
