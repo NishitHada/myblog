@@ -63,11 +63,6 @@ params:
     - name: rss
       url: "index.xml"
 
-  editPost:
-    URL: "https://github.com/NishitHada/myblog/tree/main/content"
-    Text: "Suggest Changes"
-    appendFilePath: true
-
   fuseOpts:
     isCaseSensitive: false
     shouldSort: true
